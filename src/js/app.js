@@ -14,8 +14,29 @@ var vk = angular.module('vk', [
                 .state('photos', {
                     url: '/photos',
                     templateUrl: 'templates/photos.html',
-                    // controller: 'albumsCtrl as albums'
+                    // views: {
+                    //     'filters': {
+                    //         template: '<h1>filters</h1>'
+                    //     },
+                    //     'tabledata': {
+                    //         template: '<h1>tabledata</h1>'
+                    //     },
+                    //     'graph': {
+                    //         template: '<h1>graph</h1>'
+                    //     },
+                    // }
                 })
+                .state('photos.current', {
+                    url: '/:id',
+                    templateUrl: 'templates/current-album.html',
+                    controller: 'photosController as photos'
+                })
+                .state('photos.current.details', {
+                    url: '/:index',
+                    templateUrl: 'templates/photos-details.html',
+                    controller: 'photosController as photos'
+                })
+
 
 
 
@@ -28,14 +49,13 @@ var vk = angular.module('vk', [
 
 
 
-            // $urlRouterProvider.otherwise('/pokemons');
+            // $urlRouterProvider.otherwise('/albums');
         }
     ])
-    .run(function($location, $localStorage) {
-        var paramsStr,
-            params = $localStorage.params || {};
-        if (!params == {}) {
-            alert(53634)
+    .run(function($location, $sessionStorage, $rootScope) {
+        var paramsStr;
+        $rootScope.params = $sessionStorage.params || {};
+        if (!$rootScope.params.user_id) {
             location = 'https://oauth.vk.com/authorize?client_id=5842586&display=page&redirect_uri=localhost:8080&scope=photos&response_type=token&v=5.62&state=123456'
         }
         paramsStr = $location.path().slice(1).split('&')
@@ -47,11 +67,10 @@ var vk = angular.module('vk', [
             var ind = param.indexOf('='),
                 key = param.slice(0, ind),
                 value = param.slice(ind + 1);
-            params[key] = value;
+            $rootScope.params[key] = value;
         })
-        console.log("params ", params);
-        $localStorage.params = params
-        userId = params.user_id;
+        $sessionStorage.params = $rootScope.params
+        userId = $rootScope.params.user_id;
         alert(userId)
 
     })

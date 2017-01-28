@@ -79,7 +79,7 @@ gulp.task('js', function() {
     gulp.src([
             'src/js/app.js',
             'src/js/controllers/mainCtrl.js',
-            // 'src/js/controllers/pokemonsCtrl.js',
+            'src/js/controllers/photosCtrl.js',
             // 'src/js/controllers/favoritesCtrl.js'
         ])
         .pipe(concat('main.js'))
