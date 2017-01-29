@@ -9,47 +9,24 @@ var vk = angular.module('vk', [
                 .state('albums', {
                     url: '/albums',
                     templateUrl: 'templates/albums.html',
-                    // controller: 'albumsCtrl as albums'
                 })
                 .state('photos', {
                     url: '/photos',
-                    templateUrl: 'templates/photos.html',
-                    // views: {
-                    //     'filters': {
-                    //         template: '<h1>filters</h1>'
-                    //     },
-                    //     'tabledata': {
-                    //         template: '<h1>tabledata</h1>'
-                    //     },
-                    //     'graph': {
-                    //         template: '<h1>graph</h1>'
-                    //     },
-                    // }
+                    templateUrl: 'templates/photos.html'
                 })
                 .state('photos.current', {
                     url: '/:id',
-                    templateUrl: 'templates/current-album.html',
-                    controller: 'photosController as photos'
+                    templateUrl: 'templates/current-album.html'
                 })
-                .state('photos.current.details', {
-                    url: '/:index',
-                    templateUrl: 'templates/photos-details.html',
-                    controller: 'photosController as photos'
+                .state('photos.details', {
+                    url: '/:id/:index',
+                    templateUrl: 'templates/photos-details.html'
                 })
 
 
 
 
-
-            // .state('login', {
-            //     url: '/login',
-            //     templateUrl: 'templates/login.html',
-            //     controller: 'loginCtrl as login'
-            // })
-
-
-
-            // $urlRouterProvider.otherwise('/albums');
+            $urlRouterProvider.otherwise('/albums');
         }
     ])
     .run(function($location, $sessionStorage, $rootScope) {
@@ -59,10 +36,7 @@ var vk = angular.module('vk', [
             location = 'https://oauth.vk.com/authorize?client_id=5842586&display=page&redirect_uri=localhost:8080&scope=photos&response_type=token&v=5.62&state=123456'
         }
         paramsStr = $location.path().slice(1).split('&')
-        console.log("$location.path().slice(1).split('&') ", $location.path().slice(1).split('&'));
-        console.log("$location.path().slice(1) ", $location.path().slice(1));
-        console.log("$location.path() ", $location.path());
-        console.log("paramsStr ", paramsStr);
+
         paramsStr.forEach(function(param, index) {
             var ind = param.indexOf('='),
                 key = param.slice(0, ind),
@@ -71,7 +45,7 @@ var vk = angular.module('vk', [
         })
         $sessionStorage.params = $rootScope.params
         userId = $rootScope.params.user_id;
-        alert(userId)
+
 
     })
 var mainCtrl = vk.controller('mainCtrl', ['$scope', '$rootScope', '$http', '$routeParams', '$location', function($scope, $rootScope, $http, $routeParams, $location) {
@@ -81,68 +55,28 @@ var mainCtrl = vk.controller('mainCtrl', ['$scope', '$rootScope', '$http', '$rou
         params = {},
         userId = $rootScope.params.user_id
 
-    vm.p = params
-        // if (params != {}) {
-        //     paramsStr = $location.path().slice(1).split('&')
-        //     paramsStr.forEach(function(param, index) {
-        //         var ind = param.indexOf('='),
-        //             key = param.slice(0, ind),
-        //             value = param.slice(ind + 1);
-        //         params[key] = value;
-        //     })
-        //     console.log("params ", params);
-        //     userId = params.user_id;
-        //     alert(userId)
-        // }
-    vm.writeURL = function() {
-        // paramsStr = $location.path().slice(1).split('&')
-        // console.log("$location.path().slice(1).split('&') ", $location.path().slice(1).split('&'));
-        // console.log("$location.path().slice(1) ", $location.path().slice(1));
-        // console.log("$location.path() ", $location.path());
-        // console.log("paramsStr ", paramsStr);
-        // paramsStr.forEach(function(param, index) {
-        //     var ind = param.indexOf('='),
-        //         key = param.slice(0, ind),
-        //         value = param.slice(ind + 1);
-        //     params[key] = value;
-        // })
-        // console.log("params ", params);
-        // userId = params.user_id;
-        // alert(userId)
-    }
 
-
-
-    vm.run = function() {
-
-    }
 
 
     $http.get(apiUrl + 'photos.getAlbums?owner_id=' + userId + '&v=5.52')
-        .then(function(response) {
-            vm.albums = response.data.response;
-            console.log("response.data ", response.data);
-            console.log("vm.albums ", vm.albums);
+        .then(function(result) {
+            vm.albums = result.data.response;
         })
         .then(function() {
             vm.albums.items.forEach(function(album) {
-                var thumbSrc = apiUrl + 'photos.getById?photos=' + userId + '_' + album.thumb_id
-                console.log("album ", album);
-
+                var thumbSrc = apiUrl + 'photos.getById?photos=' + userId + '_' + album.thumb_id;
                 $http.get(thumbSrc)
-                    .then(function(response) {
-                        album.thumbSrc = response.data.response[0].src_big;
+                    .then(function(result) {
+                        album.thumbSrc = result.data.response[0].src_big;
                     });
-
             })
         })
-        .then(function() {
 
-        })
+
 
     $http.get(apiUrl + 'users.get?user_id=' + userId)
-        .then(function(response) {
-            vm.user = response.data.response;
+        .then(function(result) {
+            vm.user = result.data.response;
         });
 
 
@@ -154,24 +88,68 @@ var mainCtrl = vk.controller('mainCtrl', ['$scope', '$rootScope', '$http', '$rou
         .module('vk')
         .controller('photosController', photosController);
 
-    photosController.inject = ['$scope', '$stateParams', '$http', '$state'];
+    photosController.inject = ['$scope', '$stateParams', '$http', '$state', '$rootScope', '$sessionStorage'];
 
-    function photosController($scope, $stateParams, $http, $state) {
-        alert(425235)
+    function photosController($scope, $stateParams, $http, $state, $rootScope, $sessionStorage) {
         var vm = this;
-        vm.id = $stateParams.id
+        vm.id = $stateParams.id;
+
         $http.get('https://api.vk.com/method/' + 'photos.get?owner_id=' + userId + '&album_id=' +
                 $stateParams.id + '&v=5.52')
-            .then(function(response) {
-                vm.albumPhotos = response.data.response;
-                console.log("vm.albumPhotos ", vm.albumPhotos);
-            });
-        vm.showPhotoDetails = function(index) {
-            vm.currentPhoto = vm.albumPhotos.items[index];
-            console.log("vm.albumPhotos.items[index] ", vm.albumPhotos.items[index]);
-            console.log("vm.currentPhoto ", vm.currentPhoto);
+            .then(function(result) {
+                vm.albumPhotos = result.data.response;
+            })
+            .then(function() {
+                if ($state.is('photos.details')) {
+                    getCurrentPhoto();
+                }
+            })
 
-            $state.go('details', { index: index })
+        $http.get('https://api.vk.com/method/' + 'photos.getUploadServer?album_id=' +
+                $stateParams.id + '&v=5.52&access_token=' + $sessionStorage.params.access_token)
+            .then(function(result) {
+                vm.uploadUrl = result.data.response.upload_url;
+            })
+        $rootScope.$on('$stateChangeSuccess',
+            function(event, toState) {
+                if (toState.name == 'photos.details' && $stateParams.index) {
+
+                    getCurrentPhoto()
+                }
+            })
+
+        function getCurrentPhoto() {
+            vm.albumPhotos.items.forEach(function(photo) {
+                if (photo.id == $stateParams.index) {
+                    vm.currentPhoto = photo;
+                }
+            })
+        }
+        vm.sendPhoto = function() {
+            var formData = new FormData(),
+                selectedFile = document.forms.photoUpload.photoUrl.files[0];
+
+            formData.append('file1', selectedFile);
+
+            $http.post(vm.uploadUrl, formData, {
+                headers: {
+                    'Content-Type': undefined
+                },
+                transformRequest: angular.identity
+            }).success(function(result) {
+                $http.get(
+                        'https://api.vk.com/method/' +
+                        'photos.save?server=' + result.server +
+                        '&photos_list=' + result.photos_list +
+                        '&aid=' + result.aid +
+                        '&hash=' + result.hash +
+                        '&album_id=' + $stateParams.id +
+                        '&v=5.52&access_token=' + $sessionStorage.params.access_token
+                    )
+                    .then(function() {
+                        alert('Upload successful!')
+                    })
+            })
         }
     }
 })();

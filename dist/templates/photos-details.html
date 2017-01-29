@@ -1,2 +1,10 @@
-{{photos.currentPhoto}}
-<h1>fdsgsdfg</h1>
+<a href="/#/photos/{{$stateParams.id}}"> &lt; </a>
+<img src="{{photos.currentPhoto.photo_604}}" alt="#">
+<p><strong>Date:</strong>{{photos.currentPhoto.date | date : format : timezone}}</p>
+<p ng-if="photos.currentPhoto.text"><strong>Desctiption:</strong>{{photos.currentPhoto.text}}</p>
+{{photos.uploadUrl}}
+<form name="photoUpload">
+    <input type="file" name="photoUrl">
+    <button ng-click="photos.sendPhoto()">send</button>
+    <!--<input type="submit">-->
+</form>

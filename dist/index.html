@@ -14,16 +14,12 @@
     <script src="js/main.js"></script>
 </head>
 
-<body ng-controller="mainCtrl as main" ng-keydown="main.hideModal($event)">
+<body ng-controller="mainCtrl as main">
     <div class="container">
-        <!--<a href="https://oauth.vk.com/authorize?client_id=5842586&display=page&redirect_uri=localhost:8080&scope=photos&response_type=token&v=5.62&state=123456">loginnn</a>-->
-        <a href="#/albums">albums</a>
-        <a href="#/photos">photos</a>
 
 
         <div ui-view></div>
-        <button ng-click="main.run()">run</button>
-        <button ng-click="main.writeURL()">url</button>
+
     </div>
 
 </body>

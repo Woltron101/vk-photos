@@ -1,4 +1,4 @@
-<div class="user-name">{{main.user[0].first_name +' '+ main.user[0].last_name}}</div>
+<!--<div class="user-name">{{main.user[0].first_name +' '+ main.user[0].last_name}}</div>-->
 
 <div ng-repeat="album in main.albums.items" class="clearfix">
     <a href="/#/photos/{{album.id}}">
@@ -11,8 +11,7 @@
             <div class="size ">{{album.size}} files</div>
 
             <p>{{ album.created * 1000 | date : format : timezone}}</p>
-            <h1>albums</h1>
-            <!--{{main.p}}-->
+
         </div>
     </a>
 </div>
