@@ -144,9 +144,9 @@ var vk = angular.module('vk', [
         .module('vk')
         .controller('photoUploasController', photoUploasController);
 
-    photoUploasController.inject = ['$scope', '$http', '$stateParams', '$sessionStorage'];
+    photoUploasController.inject = ['$scope', '$http', '$stateParams', '$sessionStorage', '$rootScope'];
 
-    function photoUploasController($scope, $http, $stateParams, $sessionStorage) {
+    function photoUploasController($scope, $http, $stateParams, $sessionStorage, $rootScope) {
         var vm = this,
             apiUrl = 'https://api.vk.com/method/',
             id = '241038246';
@@ -156,7 +156,7 @@ var vk = angular.module('vk', [
                 '&access_token=' + $sessionStorage.params.access_token +
                 '&v=5.52&')
             .then(function(result) {
-                vm.uploadUrl = result.data.response.upload_url;
+                $rootScope.uploadUrl = result.data.response.upload_url;
             })
 
         vm.sendPhoto = function() {
@@ -185,90 +185,6 @@ var vk = angular.module('vk', [
                     })
             })
 
-            console.clear();
-            angular.module('fileUpload', [])
-                .controller("upload", ['$scope', '$http', 'uploadService', function($scope, $http, uploadService) {
-                    $scope.$watch('file', function(newfile, oldfile) {
-                        if (angular.equals(newfile, oldfile)) {
-                            return;
-                        }
-
-                        uploadService.upload(newfile).then(function(res) {
-                            // DO SOMETHING WITH THE RESULT!
-                            console.log("result", res);
-                        })
-                    });
-
-                }])
-                .service("uploadService", function($http, $q) {
-
-                    return ({
-                        upload: upload
-                    });
-
-                    function upload(file) {
-                        var upl = $http({
-                            method: 'POST',
-                            url: 'http://jsonplaceholder.typicode.com/posts', // /api/upload
-                            headers: {
-                                'Content-Type': 'multipart/form-data'
-                            },
-                            data: {
-                                upload: file
-                            },
-                            transformRequest: function(data, headersGetter) {
-                                var formData = new FormData();
-                                angular.forEach(data, function(value, key) {
-                                    formData.append(key, value);
-                                });
-
-                                var headers = headersGetter();
-                                delete headers['Content-Type'];
-
-                                return formData;
-                            }
-                        });
-                        return upl.then(handleSuccess, handleError);
-
-                    } // End upload function
-
-                    // ---
-                    // PRIVATE METHODS.
-                    // ---
-
-                    function handleError(response, data) {
-                        if (!angular.isObject(response.data) || !response.data.message) {
-                            return ($q.reject("An unknown error occurred."));
-                        }
-
-                        return ($q.reject(response.data.message));
-                    }
-
-                    function handleSuccess(response) {
-                        return (response);
-                    }
-
-                })
-                .directive("fileinput", [function() {
-                    return {
-                        scope: {
-                            fileinput: "=",
-                            filepreview: "="
-                        },
-                        link: function(scope, element, attributes) {
-                            element.bind("change", function(changeEvent) {
-                                scope.fileinput = changeEvent.target.files[0];
-                                var reader = new FileReader();
-                                reader.onload = function(loadEvent) {
-                                    scope.$apply(function() {
-                                        scope.filepreview = loadEvent.target.result;
-                                    });
-                                }
-                                reader.readAsDataURL(scope.fileinput);
-                            });
-                        }
-                    }
-                }]);
 
 
 
@@ -279,48 +195,73 @@ var vk = angular.module('vk', [
 })();
             // console.clear();
             angular.module('vk')
-                .controller("upload", ['$scope', '$http', 'uploadService', function($scope, $http, uploadService) {
-                    $scope.$watch('file', function(newfile, oldfile) {
-                        if (angular.equals(newfile, oldfile)) {
-                            return;
+                .controller("upload", ['$scope', '$http', 'uploadService', '$rootScope', '$sessionStorage',
+                    function($scope, $http, uploadService, $rootScope, $sessionStorage) {
+                        // $scope.$watch('file', function(newfile, oldfile) {
+                        //     if (angular.equals(newfile, oldfile)) {
+                        //         return;
+                        //     }
+
+
+                        // });
+                        $scope.u = function() {
+                            uploadService.upload()
+                                // .then(function(res) {
+                                //     // DO SOMETHING WITH THE RESULT!
+                                //     console.log("result", res);
+                                // })
+
                         }
-
-                        uploadService.upload(newfile).then(function(res) {
-                            // DO SOMETHING WITH THE RESULT!
-                            console.log("result", res);
-                        })
-                    });
-
-                }])
-                .service("uploadService", function($http, $q) {
+                    }
+                ])
+                .service("uploadService", function($http, $q, $sessionStorage) {
 
                     return ({
                         upload: upload
                     });
 
-                    function upload(file) {
-                        var upl = $http({
-                            method: 'POST',
-                            url: 'http://jsonplaceholder.typicode.com/posts', // /api/upload
-                            headers: {
-                                'Content-Type': 'multipart/form-data'
-                            },
-                            data: {
-                                upload: file
-                            },
-                            transformRequest: function(data, headersGetter) {
-                                var formData = new FormData();
-                                angular.forEach(data, function(value, key) {
-                                    formData.append(key, value);
-                                });
+                    function upload() {
 
-                                var headers = headersGetter();
-                                delete headers['Content-Type'];
+                        var uploadUrl,
+                            upl
+                        $http.get('https://api.vk.com/method/' +
+                                'photos.getUploadServer?album_id=' + '241038246' +
+                                '&access_token=' + $sessionStorage.params.access_token +
+                                '&v=5.52&')
+                            .then(function(result) {
+                                uploadUrl = result.data.response.upload_url;
+                            })
+                            .then(function() {
+                                var file = document.forms.photoUpload.photoUrl.files
 
-                                return formData;
-                            }
-                        });
-                        return upl.then(handleSuccess, handleError);
+                                upl = $http({
+                                    method: 'POST',
+                                    url: uploadUrl, // /api/upload
+                                    headers: {
+                                        'Content-Type': 'multipart/form-data'
+                                    },
+                                    data: {
+                                        upload: file
+                                    },
+                                    transformRequest: function(data, headersGetter) {
+                                        var formData = new FormData();
+                                        angular.forEach(data, function(value, key) {
+                                            formData.append(key, value);
+                                        });
+
+                                        var headers = headersGetter();
+                                        delete headers['Content-Type'];
+
+                                        return formData;
+                                    }
+                                }).then(handleSuccess, handleError);
+
+
+                            })
+
+
+                        // return upl.then(handleSuccess, handleError);
+
 
                     } // End upload function
 
@@ -337,6 +278,7 @@ var vk = angular.module('vk', [
                     }
 
                     function handleSuccess(response) {
+                        console.log("response ", response);
                         return (response);
                     }
 
@@ -369,40 +311,19 @@ var vk = angular.module('vk', [
                                                 '" title="', escape(theFile.name), '"/>'
                                             ].join('');
                                             document.getElementById('list').insertBefore(span, null);
-                                            scope.$apply(function() {
-                                                scope.filepreview = loadEvent.target.result;
-                                                console.log("loadEvent.target ", loadEvent.target);
-                                                console.log("scope.filepreview ", scope.filepreview);
-                                            });
+                                            // scope.$apply(function() {
+                                            //     scope.filepreview = loadEvent.target.result;
+                                            //     console.log("loadEvent.target ", loadEvent.target);
+                                            //     console.log("scope.filepreview ", scope.filepreview);
+                                            // });
                                         };
                                     })(f);
 
                                     // Read in the image file as a data URL.
                                     reader.readAsDataURL(f);
                                 }
-                                // var reader = new FileReader();
-                                // reader.onload = function(loadEvent) {
-                                //     scope.$apply(function() {
-                                //         scope.filepreview = loadEvent.target.result;
-                                //         console.log("loadEvent.target ", loadEvent.target);
-                                //         console.log("scope.filepreview ", scope.filepreview);
-                                //     });
-                                // }
-                                // reader.readAsDataURL(scope.fileinput);
-                                // scope.fileinput.forEach(function(file) {
 
-
-                                // })
                             });
                         }
                     }
                 }]);
-
-            // function handleFileSelect(evt) {
-            //     // FileList object
-
-            //     // Loop through the FileList and render image files as thumbnails.
-
-            // }
-            // console.log("document.getElementById('files') ", document.getElementById('files'));
-            // document.getElementById('files').addEventListener('change', handleFileSelect, false);
