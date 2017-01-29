@@ -22,10 +22,10 @@ var vk = angular.module('vk', [
                     url: '/:id/:index',
                     templateUrl: 'templates/photos-details.html'
                 })
-
-
-
-
+                .state('upload', {
+                    url: '/upload',
+                    templateUrl: 'templates/photo-upload.html'
+                })
             $urlRouterProvider.otherwise('/albums');
         }
     ])
@@ -35,16 +35,13 @@ var vk = angular.module('vk', [
         if (!$rootScope.params.user_id) {
             location = 'https://oauth.vk.com/authorize?client_id=5842586&display=page&redirect_uri=localhost:8080&scope=photos&response_type=token&v=5.62&state=123456'
         }
-        paramsStr = $location.path().slice(1).split('&')
-
+        paramsStr = $location.path().slice(1).split('&');
         paramsStr.forEach(function(param, index) {
             var ind = param.indexOf('='),
                 key = param.slice(0, ind),
                 value = param.slice(ind + 1);
             $rootScope.params[key] = value;
         })
-        $sessionStorage.params = $rootScope.params
+        $sessionStorage.params = $rootScope.params;
         userId = $rootScope.params.user_id;
-
-
-    })
+    });

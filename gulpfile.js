@@ -79,8 +79,9 @@ gulp.task('js', function() {
     gulp.src([
             'src/js/app.js',
             'src/js/controllers/mainCtrl.js',
-            'src/js/controllers/photosCtrl.js'
-            // 'src/js/controllers/currentPhotoCtrl.js'
+            'src/js/controllers/photosCtrl.js',
+            'src/js/controllers/photoUploadCtrl.js',
+            'src/js/controllers/file.js'
         ])
         .pipe(concat('main.js'))
         // .pipe(uglify())
