@@ -6,19 +6,17 @@
         .module('vk')
         .controller('photosController', photosController);
 
-    photosController.inject = ['$stateParams', '$http', '$state', '$rootScope', '$sessionStorage'];
+    photosController.inject = ['$stateParams', '$http', '$state', '$rootScope', '$sessionStorage', 'URL', 'requestFactory'];
 
-    function photosController($stateParams, $http, $state, $rootScope, $sessionStorage) {
-        var vm = this,
-            apiUrl = 'https://api.vk.com/method/';
+    function photosController($stateParams, $http, $state, $rootScope, $sessionStorage, URL, requestFactory) {
+        var vm = this;
 
-        $http.get(apiUrl +
-                'photos.get?owner_id=' + userId +
-                'access_token=' + $sessionStorage.params.access_token +
-                '&album_id=' + $stateParams.id +
-                '&v=5.52')
+        console.log("requestFactory.getAlbumPhotos() ", requestFactory.getAlbumPhotos());
+        requestFactory.getAlbumPhotos()
             .then(function(result) {
-                vm.albumPhotos = result.data.response;
+                console.log("result ", result);
+                vm.albumPhotos = result.data.response.items;
+                console.log("vm.albumPhotos ", vm.albumPhotos);
             })
             .then(function() {
                 if ($state.is('photos.details')) getCurrentPhoto();

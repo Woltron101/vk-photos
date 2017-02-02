@@ -80,8 +80,11 @@ gulp.task('js', function() {
             'src/js/app.js',
             'src/js/controllers/mainCtrl.js',
             'src/js/controllers/photosCtrl.js',
-            'src/js/controllers/photoUploadCtrl.js',
-            'src/js/controllers/file.js'
+            // 'src/js/controllers/photoUploadCtrl.js',
+            'src/js/controllers/fileUploadCtrl.js',
+            'src/js/services/uploadService.js',
+            'src/js/services/requestFactory.js',
+            'src/js/directives/uploadDir.js',
         ])
         .pipe(concat('main.js'))
         // .pipe(uglify())

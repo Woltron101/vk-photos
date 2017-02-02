@@ -1,29 +1,14 @@
-<form name="photoUpload" ng-controller="photoUploasController as upload">
-    <input type="file" name="photoUrl">
-    <button ng-click="upload.sendPhoto()">send</button>
-</form>
-
-<div class="row" ng-controller="upload">
-    <div class="col-md-6">
-        <input type="file" fileinput="file" filepreview="filepreview" multiple/>
-        <button ng-click="u()">send</button>
+<div class="row" ng-controller="uploadController as upload">
+    <h3>album</h3>
+    <select ng-model="upload.activeAlbum">
+        <option ng-repeat="album in main.albums.items" value="{{album.id}}">{{album.title}}</option>
+    </select>
+    <div class="col-md-12">
+        <label for="" class="input-file-wraper">
+            <input type="file" fileinput="file" name="photoUrl" id="inp" filepreview="filepreview" multiple/>
+        <div id="filedrag">Drop files here or <span>browse</span> to upload</div>
+        </label>
+        <button ng-click="upload.upload()">send</button>
     </div>
-    <!--<div class="col-md-6">
-        <img ng-src="{{filepreview}}" class="img-responsive" ng-show="filepreview" />
-    </div>-->
-
-
-    <output id="list"></output>
+    <div id="list"></div>
 </div>
-<!--<style>
-    .thumb {
-        height: 75px;
-        border: 1px solid #000;
-        margin: 10px 5px 0 0;
-    }
-</style>-->
-
-<!--<input type="file" id="files" name="files[]" multiple />-->
-
-<!--<script>
-</script>-->

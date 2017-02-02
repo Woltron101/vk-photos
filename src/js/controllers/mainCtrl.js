@@ -6,41 +6,32 @@
         .module('vk')
         .controller('mainController', mainController);
 
-    mainController.inject = ['$rootScope', '$http', '$routeParams', '$location', '$sessionStorage'];
+    mainController.inject = ['$http', 'URL', 'requestFactory'];
 
-    function mainController($rootScope, $http, $routeParams, $location, $sessionStorage) {
-        var vm = this,
-            paramsStr,
-            apiUrl = 'https://api.vk.com/method/',
-            params = {},
-            userId = $rootScope.params.user_id
+    function mainController($http, URL, requestFactory) {
+        var vm = this
 
 
-
-
-        $http.get(apiUrl +
-                'photos.getAlbums?owner_id=' + userId +
-                'access_token=' + $sessionStorage.params.access_token +
-                '&v=5.52')
+        requestFactory.getAlbums()
             .then(function(result) {
                 vm.albums = result.data.response;
-            })
-            .then(function() {
-                vm.albums.items.forEach(function(album) {
-                    var thumbSrc = apiUrl + 'photos.getById?photos=' + userId + '_' + album.thumb_id;
-                    addThumbLink(thumbSrc, album);
-                })
+                addAlbumThumbSrcs();
             })
 
-
-
-        $http.get(apiUrl + 'users.get?user_id=' + userId)
+        requestFactory.getUser()
             .then(function(result) {
                 vm.user = result.data.response;
             });
 
 
-        function addThumbLink(thumbSrc, album) {
+        function addAlbumThumbSrcs() {
+            vm.albums.forEach(function(album) {
+                var thumbSrc = URL.BASE_URL + 'photos.getById?photos=' + userId + '_' + album.thumb_id;
+                getAlbumThumbSrc(thumbSrc, album);
+            })
+        }
+
+        function getAlbumThumbSrc(thumbSrc, album) {
             $http.get(thumbSrc, album)
                 .then(function(result) {
                     album.thumbSrc = result.data.response[0].src_big;

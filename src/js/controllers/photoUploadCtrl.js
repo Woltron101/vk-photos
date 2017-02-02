@@ -4,20 +4,20 @@
 
     angular
         .module('vk')
-        .controller('photoUploasController', photoUploasController);
+        .controller('photoUploadController', photoUploadController);
 
-    photoUploasController.inject = ['$scope', '$http', '$stateParams', '$sessionStorage', '$rootScope'];
+    photoUploadController.inject = ['$scope', '$http', '$stateParams', '$sessionStorage', '$rootScope', '$state'];
 
     function photoUploasController($scope, $http, $stateParams, $sessionStorage, $rootScope) {
         var vm = this,
-            apiUrl = 'https://api.vk.com/method/',
-            id = '241038246';
+            apiUrl = 'https://api.vk.com/method/'
 
         $http.get(apiUrl +
                 'photos.getUploadServer?album_id=' + id +
                 '&access_token=' + $sessionStorage.params.access_token +
                 '&v=5.52&')
             .then(function(result) {
+                console.log("result ", result);
                 $rootScope.uploadUrl = result.data.response.upload_url;
             })
 
@@ -43,15 +43,9 @@
                         '&v=5.52&access_token=' + $sessionStorage.params.access_token
                     )
                     .then(function() {
-                        alert('Upload successful!')
+                        $state.go('photos.current', { id: $stateParams.id })
                     })
             })
-
-
-
-
-
-
         }
     }
 })();

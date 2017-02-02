@@ -1,7 +1,8 @@
 <div class="user-name">{{main.user[0].first_name +' '+ main.user[0].last_name}}</div>
 
-<div ng-repeat="album in main.albums.items" class="clearfix">
-    <a href="/#/photos/{{album.id}}">
+<div ng-repeat="album in main.albums" class="clearfix">
+
+    <a href="/#/photos/{{album.aid}}">
         <div class=" img-wrap col-sm-3 text-center ">
             <img ng-src="{{album.thumbSrc}} " alt="# ">
         </div>
