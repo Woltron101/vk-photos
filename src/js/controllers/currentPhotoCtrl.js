@@ -6,10 +6,16 @@
         .module('vk')
         .controller('currentPhotoController', currentPhotoController);
 
-    currentPhotoController.inject = ['$scope'];
+    currentPhotoController.inject = ['requestFactory', '$stateParams'];
 
-    function currentPhotoController($scope) {
+    function currentPhotoController(requestFactory, $stateParams) {
         var vm = this;
-        vm.currentPhoto = vm.albumPhotos.items[$stateParams.index];
+
+        requestFactory.getAlbumPhotos()
+            .then(function(result) {
+                vm.albumPhotos = result.data.response.items;
+                vm.currentPhoto = vm.albumPhotos[$stateParams.index];
+            })
+
     }
 })();

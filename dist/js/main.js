@@ -15,21 +15,20 @@ var vk = angular.module('vk', [
                     url: '/albums',
                     templateUrl: 'templates/albums.html',
                 })
-                .state('photos', {
-                    url: '/photos',
-                    templateUrl: 'templates/photos.html'
-                })
-                .state('photos.current', {
-                    url: '/:id',
-                    templateUrl: 'templates/current-album.html'
-                })
-                .state('photos.details', {
-                    url: '/:id/:index',
-                    templateUrl: 'templates/photos-details.html'
-                })
                 .state('upload', {
                     url: '/upload',
-                    templateUrl: 'templates/photo-upload.html'
+                    templateUrl: 'templates/photo-upload.html',
+                    controller: 'uploadController as upload'
+                })
+                .state('current', {
+                    url: '/:id',
+                    templateUrl: 'templates/current-album.html',
+                    controller: 'photosController as photos'
+                })
+                .state('details', {
+                    url: '/:id/:index',
+                    templateUrl: 'templates/photos-details.html',
+                    controller: 'currentPhotoController as curPhoto'
                 })
             $urlRouterProvider.otherwise('/albums');
 
@@ -61,7 +60,7 @@ var vk = angular.module('vk', [
         .module('vk')
         .controller('mainController', mainController);
 
-    mainController.inject = ['$http', 'URL', 'requestFactory'];
+    mainController.inject = ['$http', 'requestFactory'];
 
     function mainController($http, URL, requestFactory) {
         var vm = this
@@ -103,34 +102,38 @@ var vk = angular.module('vk', [
         .module('vk')
         .controller('photosController', photosController);
 
-    photosController.inject = ['$stateParams', '$http', '$state', '$rootScope', '$sessionStorage', 'URL', 'requestFactory'];
+    photosController.inject = ['requestFactory'];
 
-    function photosController($stateParams, $http, $state, $rootScope, $sessionStorage, URL, requestFactory) {
+    function photosController(requestFactory) {
         var vm = this;
 
-        console.log("requestFactory.getAlbumPhotos() ", requestFactory.getAlbumPhotos());
         requestFactory.getAlbumPhotos()
             .then(function(result) {
                 console.log("result ", result);
                 vm.albumPhotos = result.data.response.items;
-                console.log("vm.albumPhotos ", vm.albumPhotos);
-            })
-            .then(function() {
-                if ($state.is('photos.details')) getCurrentPhoto();
             })
 
-        $rootScope.$on('$stateChangeSuccess',
-            function(event, toState) {
-                if (toState.name == 'photos.details') getCurrentPhoto();
+    }
+})();
+;
+(function() {
+    'use strict';
+
+    angular
+        .module('vk')
+        .controller('currentPhotoController', currentPhotoController);
+
+    currentPhotoController.inject = ['requestFactory', '$stateParams'];
+
+    function currentPhotoController(requestFactory, $stateParams) {
+        var vm = this;
+
+        requestFactory.getAlbumPhotos()
+            .then(function(result) {
+                vm.albumPhotos = result.data.response.items;
+                vm.currentPhoto = vm.albumPhotos[$stateParams.index];
             })
 
-        function getCurrentPhoto() {
-            vm.albumPhotos.items.forEach(function(photo) {
-                if (photo.id == $stateParams.index) {
-                    vm.currentPhoto = photo;
-                }
-            })
-        }
     }
 })();
 ;
@@ -141,9 +144,9 @@ var vk = angular.module('vk', [
         .module('vk')
         .controller('uploadController', uploadController);
 
-    uploadController.inject = ['$scope', '$http', 'uploadService', '$rootScope', '$sessionStorage', 'URL'];
+    uploadController.inject = ['$scope', '$http', 'uploadService', '$rootScope', '$sessionStorage', 'URL', 'requestFactory'];
 
-    function uploadController($scope, $http, uploadService, $rootScope, $sessionStorage, URL) {
+    function uploadController($scope, $http, uploadService, $rootScope, $sessionStorage, URL, requestFactory) {
         var vm = this;
 
         vm.upload = function() {
@@ -152,10 +155,12 @@ var vk = angular.module('vk', [
         $scope.$watch('activeAlbum', function() {
             $rootScope.activeAlbum = vm.activeAlbum
         })
-        $http.get(URL.BASE_URL +
-                'photos.getAlbums?owner_id=' + $rootScope.params.user_id +
-                'access_token=' + $sessionStorage.params.access_token +
-                '&v=5.52')
+        requestFactory.getAlbums()
+            .then(function(result) {
+                vm.albums = result.data.response;
+                console.log("result.data ", result.data);
+                addAlbumThumbSrcs();
+            })
             .then(function(result) {
                 vm.albums = result.data.response.items;
             })
@@ -218,10 +223,10 @@ vk.factory('requestFactory', ['$http', 'URL', '$sessionStorage', '$stateParams',
     function($http, URL, $sessionStorage, $stateParams) {
         return {
             userId: userId,
-
+            cb: '&callback=JSON_CALLBACK',
 
             getAlbums: function() {
-                var url = URL.BASE_URL + 'photos.getAlbums' + '?owner_id=' + this.userId + '&callback=JSON_CALLBACK';
+                var url = URL.BASE_URL + 'photos.getAlbums' + '?owner_id=' + this.userId + this.cb;
 
                 return $http.jsonp(url)
             },
@@ -236,7 +241,7 @@ vk.factory('requestFactory', ['$http', 'URL', '$sessionStorage', '$stateParams',
                     'photos.get?owner_id=' + userId +
                     'access_token=' + $sessionStorage.params.access_token +
                     '&album_id=' + $stateParams.id +
-                    '&v=5.52' + '&callback=JSON_CALLBACK')
+                    '&v=5.52' + this.cb)
 
 
             }

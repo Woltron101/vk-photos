@@ -15,21 +15,20 @@ var vk = angular.module('vk', [
                     url: '/albums',
                     templateUrl: 'templates/albums.html',
                 })
-                .state('photos', {
-                    url: '/photos',
-                    templateUrl: 'templates/photos.html'
-                })
-                .state('photos.current', {
-                    url: '/:id',
-                    templateUrl: 'templates/current-album.html'
-                })
-                .state('photos.details', {
-                    url: '/:id/:index',
-                    templateUrl: 'templates/photos-details.html'
-                })
                 .state('upload', {
                     url: '/upload',
-                    templateUrl: 'templates/photo-upload.html'
+                    templateUrl: 'templates/photo-upload.html',
+                    controller: 'uploadController as upload'
+                })
+                .state('current', {
+                    url: '/:id',
+                    templateUrl: 'templates/current-album.html',
+                    controller: 'photosController as photos'
+                })
+                .state('details', {
+                    url: '/:id/:index',
+                    templateUrl: 'templates/photos-details.html',
+                    controller: 'currentPhotoController as curPhoto'
                 })
             $urlRouterProvider.otherwise('/albums');
 

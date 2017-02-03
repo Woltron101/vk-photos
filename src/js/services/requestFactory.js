@@ -2,10 +2,10 @@ vk.factory('requestFactory', ['$http', 'URL', '$sessionStorage', '$stateParams',
     function($http, URL, $sessionStorage, $stateParams) {
         return {
             userId: userId,
-
+            cb: '&callback=JSON_CALLBACK',
 
             getAlbums: function() {
-                var url = URL.BASE_URL + 'photos.getAlbums' + '?owner_id=' + this.userId + '&callback=JSON_CALLBACK';
+                var url = URL.BASE_URL + 'photos.getAlbums' + '?owner_id=' + this.userId + this.cb;
 
                 return $http.jsonp(url)
             },
@@ -20,7 +20,7 @@ vk.factory('requestFactory', ['$http', 'URL', '$sessionStorage', '$stateParams',
                     'photos.get?owner_id=' + userId +
                     'access_token=' + $sessionStorage.params.access_token +
                     '&album_id=' + $stateParams.id +
-                    '&v=5.52' + '&callback=JSON_CALLBACK')
+                    '&v=5.52' + this.cb)
 
 
             }

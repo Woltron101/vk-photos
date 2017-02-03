@@ -6,7 +6,7 @@
         .module('vk')
         .controller('mainController', mainController);
 
-    mainController.inject = ['$http', 'URL', 'requestFactory'];
+    mainController.inject = ['$http', 'requestFactory'];
 
     function mainController($http, URL, requestFactory) {
         var vm = this
