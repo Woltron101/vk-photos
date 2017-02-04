@@ -1,4 +1,6 @@
-<a href="/#/photos/{{$stateParams.id}}"> &lt; </a>
-<img ng-src="{{curPhoto.currentPhoto.photo_604}}" alt="#">
-<p><strong>Date:</strong>{{curPhoto.currentPhoto.date | date : format : timezone}}</p>
-<p ng-if="curPhoto.currentPhoto.text"><strong>Desctiption:</strong>{{curPhoto.currentPhoto.text}}</p>
+<a href="/#/{{curPhoto.albumId}}" class="back-to-album button"> &lt;</a>
+<div class="current-photo-wrap">
+    <img ng-src="{{curPhoto.currentPhoto.photo_604}}" alt="#">
+    <p><strong>Date:</strong>{{curPhoto.currentPhoto.date | date : format : timezone}}</p>
+    <p ng-if="curPhoto.currentPhoto.text"><strong>Desctiption:</strong>{{curPhoto.currentPhoto.text}}</p>
+</div>

@@ -12,19 +12,19 @@
         var vm = this;
 
         vm.upload = function() {
-            uploadService.upload();
+            uploadService.upload(); //????????????????
         }
-        $scope.$watch('activeAlbum', function() {
-            $rootScope.activeAlbum = vm.activeAlbum
-        })
+
+        $scope.$watch(angular.bind(vm, function() {
+            return vm.activeAlbum;
+        }), function(value) {
+            uploadService.activeAlbum = vm.activeAlbum;
+        });
+
         requestFactory.getAlbums()
             .then(function(result) {
-                vm.albums = result.data.response;
-                console.log("result.data ", result.data);
-                addAlbumThumbSrcs();
-            })
-            .then(function(result) {
-                vm.albums = result.data.response.items;
+                vm.albums = result.data.response
+                vm.activeAlbum = vm.albums[0].aid;
             })
     }
 })();

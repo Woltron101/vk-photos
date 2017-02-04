@@ -1,14 +1,18 @@
-<div class="row" ng-controller="uploadController as upload">
-    <h3>album</h3>
-    <select ng-model="upload.activeAlbum">
-        <option ng-repeat="album in main.albums.items" value="{{album.id}}">{{album.title}}</option>
-    </select>
-    <div class="col-md-12">
+<div class="upload">
+
+    <div class="form-group">
+        <h4>Album</h4>
+        <select ng-model="upload.activeAlbum" class="form-control">
+            <option ng-repeat="album in upload.albums" ng-value="album.aid" ng-selected="!$index">{{album.title}}</option>
+        </select>
+    </div>
+    <div class="">
         <label for="" class="input-file-wraper">
             <input type="file" fileinput="file" name="photoUrl" id="inp" filepreview="filepreview" multiple/>
-        <div id="filedrag">Drop files here or <span>browse</span> to upload</div>
+            <div id="filedrag">Drop files here or <span>browse</span> to upload</div>
+            <div id="list"></div>
         </label>
-        <button ng-click="upload.upload()">send</button>
+        <button ng-click="upload.upload()" class="button">Send</button>
     </div>
-    <div id="list"></div>
+
 </div>

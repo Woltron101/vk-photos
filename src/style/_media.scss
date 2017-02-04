@@ -1,0 +1,22 @@
+@media (max-width: 768px) {
+    .album,
+    .photo-wrap {
+        width: 33.33%;
+    }
+}
+
+@media (max-width: 600px) {
+    .album,
+    .photo-wrap {
+        width: 50%;
+    }
+}
+
+@media (max-width: 480px) {
+    .album,
+    .photo-wrap {
+        width: 100%;
+    }
+}
+
+// @media (max-width: 1800px) {}

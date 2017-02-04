@@ -7,8 +7,10 @@ vk.directive("fileinput", [function() {
         link: function(scope, element, attributes) {
             element.bind("change", function(changeEvent) {
                 scope.fileinput = changeEvent.target.files;
+
+                console.log("changeEvent ", changeEvent);
                 for (var i = 0, f; f = scope.fileinput[i]; i++) {
-                    if (!f.type.match('image.*')) {
+                    if (!f.type.match('image.*') || i > 4) {
                         continue;
                     }
 
@@ -16,11 +18,11 @@ vk.directive("fileinput", [function() {
 
                     reader.onload = (function(theFile) {
                         return function(e) {
-                            var span = document.createElement('span');
-                            span.innerHTML = ['<img class="thumb" src="', e.target.result,
+                            var div = document.createElement('div');
+                            div.innerHTML = ['<img class="thumb" src="', e.target.result,
                                 '" title="', escape(theFile.name), '"/>'
                             ].join('');
-                            document.getElementById('list').insertBefore(span, null);
+                            document.getElementById('list').insertBefore(div, null);
                         };
                     })(f);
                     reader.readAsDataURL(f);

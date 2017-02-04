@@ -10,7 +10,7 @@
 
     function currentPhotoController(requestFactory, $stateParams) {
         var vm = this;
-
+        vm.albumId = $stateParams.id;
         requestFactory.getAlbumPhotos()
             .then(function(result) {
                 vm.albumPhotos = result.data.response.items;

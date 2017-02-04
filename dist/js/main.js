@@ -127,7 +127,7 @@ var vk = angular.module('vk', [
 
     function currentPhotoController(requestFactory, $stateParams) {
         var vm = this;
-
+        vm.albumId = $stateParams.id;
         requestFactory.getAlbumPhotos()
             .then(function(result) {
                 vm.albumPhotos = result.data.response.items;
@@ -150,23 +150,23 @@ var vk = angular.module('vk', [
         var vm = this;
 
         vm.upload = function() {
-            uploadService.upload();
+            uploadService.upload(); //????????????????
         }
-        $scope.$watch('activeAlbum', function() {
-            $rootScope.activeAlbum = vm.activeAlbum
-        })
+
+        $scope.$watch(angular.bind(vm, function() {
+            return vm.activeAlbum;
+        }), function(value) {
+            uploadService.activeAlbum = vm.activeAlbum;
+        });
+
         requestFactory.getAlbums()
             .then(function(result) {
-                vm.albums = result.data.response;
-                console.log("result.data ", result.data);
-                addAlbumThumbSrcs();
-            })
-            .then(function(result) {
-                vm.albums = result.data.response.items;
+                vm.albums = result.data.response
+                vm.activeAlbum = vm.albums[0].aid;
             })
     }
 })();
-vk.service("uploadService", function($http, $q, $sessionStorage, $rootScope, $state) {
+vk.service("uploadService", function($http, $q, $sessionStorage, $rootScope, $state, requestFactory) {
 
     return ({
         upload: upload
@@ -174,49 +174,50 @@ vk.service("uploadService", function($http, $q, $sessionStorage, $rootScope, $st
 
     function upload() {
         var uploadUrl,
-            upl
+            alb = this.activeAlbum;
 
-        $http.get('https://api.vk.com/method/' +
-                'photos.getUploadServer?album_id=' + $rootScope.activeAlbum +
-                '&access_token=' + $sessionStorage.params.access_token +
-                '&v=5.52&')
+        requestFactory.uploadPhotos(alb)
             .then(function(result) {
                 uploadUrl = result.data.response.upload_url;
+                getPhotoSaveParams().success(sendPhotos)
             })
-            .then(function() {
-                var files = document.getElementById('inp').files
-                for (var i = 0; i < files.length; i++) {
-                    var file = files[i];
-                    upl = $http({
-                        method: 'POST',
-                        url: uploadUrl,
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        },
-                        data: file,
-                        transformRequest: function(data, headersGetter) {
-                            var formData = new FormData(),
-                                headers = headersGetter();
-                            formData.append('file1', file);
-                            delete headers['Content-Type'];
-                            return formData;
-                        }
-                    }).success(function(result) {
-                        $http.get(
-                                'https://api.vk.com/method/' +
-                                'photos.save?server=' + result.server +
-                                '&photos_list=' + result.photos_list +
-                                '&aid=' + result.aid +
-                                '&hash=' + result.hash +
-                                '&album_id=' + $rootScope.activeAlbum +
-                                '&v=5.52&access_token=' + $sessionStorage.params.access_token
-                            )
-                            .then(function(r) {
-                                $state.go('photos.current', { id: $rootScope.activeAlbum })
-                            })
-                    })
+
+        function getPhotoSaveParams() {
+            var files = document.getElementById('inp').files;
+            return $http({
+                method: 'POST',
+                url: uploadUrl,
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                data: FormData,
+                transformRequest: function(data, headersGetter) {
+                    var formData = new FormData(),
+                        headers = headersGetter();
+                    for (var i = 0; i < files.length; i++) {
+                        formData.append('file' + i, files[i]);
+                    }
+                    delete headers['Content-Type'];
+                    return formData;
                 }
             })
+        }
+
+        function sendPhotos(result) {
+            $http.get(
+                    'https://api.vk.com/method/' +
+                    'photos.save?server=' + result.server +
+                    '&photos_list=' + result.photos_list +
+                    '&aid=' + result.aid +
+                    '&hash=' + result.hash +
+                    '&album_id=' + result.aid +
+                    '&v=5.52&access_token=' + $sessionStorage.params.access_token
+                )
+                .then(function(r) {
+                    $state.go('current', { id: alb })
+                })
+        }
+
     }
 })
 vk.factory('requestFactory', ['$http', 'URL', '$sessionStorage', '$stateParams',
@@ -224,6 +225,7 @@ vk.factory('requestFactory', ['$http', 'URL', '$sessionStorage', '$stateParams',
         return {
             userId: userId,
             cb: '&callback=JSON_CALLBACK',
+
 
             getAlbums: function() {
                 var url = URL.BASE_URL + 'photos.getAlbums' + '?owner_id=' + this.userId + this.cb;
@@ -244,7 +246,14 @@ vk.factory('requestFactory', ['$http', 'URL', '$sessionStorage', '$stateParams',
                     '&v=5.52' + this.cb)
 
 
+            },
+            uploadPhotos: function(alb) {
+                return $http.get(URL.BASE_URL +
+                    'photos.getUploadServer?album_id=' + alb +
+                    '&access_token=' + $sessionStorage.params.access_token +
+                    '&v=5.52&')
             }
+
 
 
         }
@@ -259,8 +268,10 @@ vk.directive("fileinput", [function() {
         link: function(scope, element, attributes) {
             element.bind("change", function(changeEvent) {
                 scope.fileinput = changeEvent.target.files;
+
+                console.log("changeEvent ", changeEvent);
                 for (var i = 0, f; f = scope.fileinput[i]; i++) {
-                    if (!f.type.match('image.*')) {
+                    if (!f.type.match('image.*') || i > 4) {
                         continue;
                     }
 
@@ -268,11 +279,11 @@ vk.directive("fileinput", [function() {
 
                     reader.onload = (function(theFile) {
                         return function(e) {
-                            var span = document.createElement('span');
-                            span.innerHTML = ['<img class="thumb" src="', e.target.result,
+                            var div = document.createElement('div');
+                            div.innerHTML = ['<img class="thumb" src="', e.target.result,
                                 '" title="', escape(theFile.name), '"/>'
                             ].join('');
-                            document.getElementById('list').insertBefore(span, null);
+                            document.getElementById('list').insertBefore(div, null);
                         };
                     })(f);
                     reader.readAsDataURL(f);

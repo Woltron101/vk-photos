@@ -1,4 +1,4 @@
-vk.service("uploadService", function($http, $q, $sessionStorage, $rootScope, $state) {
+vk.service("uploadService", function($http, $q, $sessionStorage, $rootScope, $state, requestFactory) {
 
     return ({
         upload: upload
@@ -6,48 +6,49 @@ vk.service("uploadService", function($http, $q, $sessionStorage, $rootScope, $st
 
     function upload() {
         var uploadUrl,
-            upl
+            alb = this.activeAlbum;
 
-        $http.get('https://api.vk.com/method/' +
-                'photos.getUploadServer?album_id=' + $rootScope.activeAlbum +
-                '&access_token=' + $sessionStorage.params.access_token +
-                '&v=5.52&')
+        requestFactory.uploadPhotos(alb)
             .then(function(result) {
                 uploadUrl = result.data.response.upload_url;
+                getPhotoSaveParams().success(sendPhotos)
             })
-            .then(function() {
-                var files = document.getElementById('inp').files
-                for (var i = 0; i < files.length; i++) {
-                    var file = files[i];
-                    upl = $http({
-                        method: 'POST',
-                        url: uploadUrl,
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        },
-                        data: file,
-                        transformRequest: function(data, headersGetter) {
-                            var formData = new FormData(),
-                                headers = headersGetter();
-                            formData.append('file1', file);
-                            delete headers['Content-Type'];
-                            return formData;
-                        }
-                    }).success(function(result) {
-                        $http.get(
-                                'https://api.vk.com/method/' +
-                                'photos.save?server=' + result.server +
-                                '&photos_list=' + result.photos_list +
-                                '&aid=' + result.aid +
-                                '&hash=' + result.hash +
-                                '&album_id=' + $rootScope.activeAlbum +
-                                '&v=5.52&access_token=' + $sessionStorage.params.access_token
-                            )
-                            .then(function(r) {
-                                $state.go('photos.current', { id: $rootScope.activeAlbum })
-                            })
-                    })
+
+        function getPhotoSaveParams() {
+            var files = document.getElementById('inp').files;
+            return $http({
+                method: 'POST',
+                url: uploadUrl,
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                data: FormData,
+                transformRequest: function(data, headersGetter) {
+                    var formData = new FormData(),
+                        headers = headersGetter();
+                    for (var i = 0; i < files.length; i++) {
+                        formData.append('file' + i, files[i]);
+                    }
+                    delete headers['Content-Type'];
+                    return formData;
                 }
             })
+        }
+
+        function sendPhotos(result) {
+            $http.get(
+                    'https://api.vk.com/method/' +
+                    'photos.save?server=' + result.server +
+                    '&photos_list=' + result.photos_list +
+                    '&aid=' + result.aid +
+                    '&hash=' + result.hash +
+                    '&album_id=' + result.aid +
+                    '&v=5.52&access_token=' + $sessionStorage.params.access_token
+                )
+                .then(function(r) {
+                    $state.go('current', { id: alb })
+                })
+        }
+
     }
 })

@@ -1,17 +1,17 @@
-<div class="user-name">{{main.user[0].first_name +' '+ main.user[0].last_name}}</div>
+<div class="albums">
+    <div ng-repeat="album in main.albums" class="album text-center">
 
-<div ng-repeat="album in main.albums" class="clearfix">
+        <a href="/#/{{album.aid}}">
+            <div class="img-wrap">
+                <img ng-src="{{album.thumbSrc}} " alt="#">
+            </div>
+            <div class="description">
+                <h3>{{album.title}}</h3>
+                <div class="size ">{{album.size}} files</div>
 
-    <a href="/#/{{album.aid}}">
-        <div class=" img-wrap col-sm-3 text-center ">
-            <img ng-src="{{album.thumbSrc}} " alt="# ">
-        </div>
-        <div class="description col-sm-9 ">
-            <h3>{{album.title}}</h3>
-            <div class="size ">{{album.size}} files</div>
+                <p>{{ album.created * 1000 | date : format : timezone}}</p>
 
-            <p>{{ album.created * 1000 | date : format : timezone}}</p>
-
-        </div>
-    </a>
+            </div>
+        </a>
+    </div>
 </div>

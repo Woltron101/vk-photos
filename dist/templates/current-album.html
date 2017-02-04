@@ -1,4 +1,5 @@
-<div ng-repeat="photo in photos.albumPhotos">
-    <a href="/#/{{photo.album_id+'/'+$index}}"><img ng-src="{{photo.photo_604}}" alt="#"></a>
-</div>
+<a href="/#/{{photo.album_id+'/'+$index}}" class="photo-wrap" ng-repeat="photo in photos.albumPhotos">
+    <img ng-src="{{photo.photo_604}}" alt="#">
+</a>
+
 <div ui-view></div>

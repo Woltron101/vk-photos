@@ -16,12 +16,15 @@
 </head>
 
 <body ng-controller="mainController as main">
-    <div class="container">
+    <main>
+        <header ng-include="'templates/header.html'"></header>
+        <div class="container">
+            <h3 class="user-name">{{main.user[0].first_name +' '+ main.user[0].last_name}}</h3>
+            <hr>
+            <div ui-view></div>
+        </div>
 
-        <a ui-sref='upload'>upload</a>
-        <div ui-view></div>
-
-    </div>
+    </main>
 
 </body>
 
